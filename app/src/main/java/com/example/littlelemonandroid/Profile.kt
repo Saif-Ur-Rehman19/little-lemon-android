@@ -23,9 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @Composable
-fun Profile() {
+fun Profile(navHostController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("data", Context.MODE_PRIVATE)
     val firstName = sharedPreferences.getString("firstname", "")
@@ -71,7 +72,10 @@ fun Profile() {
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = {  },
+            onClick = {
+                     context.getSharedPreferences("data", Context.MODE_PRIVATE).edit().clear().commit()
+                navHostController.navigate(Onboarding.route)
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0XFFe3a41b)),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier
@@ -91,5 +95,5 @@ fun Profile() {
 @Composable
 @Preview(showBackground = true)
 fun ProfilePreview() {
-    Profile()
+   // Profile(navHostController )
 }
