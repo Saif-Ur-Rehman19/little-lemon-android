@@ -1,7 +1,7 @@
 package com.example.littlelemonandroid
 
 import android.util.Log
-import android.widget.Toast
+///import com.example.littlelemonandroid.R.drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+//import androidx.compose.ui.input.key.Key.Companion.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -60,16 +62,17 @@ fun Home(navHostController: NavHostController) {
     val groupedMenuItems = remember(menuItems.value) {
         menuItems.value.groupBy { it.category }
     }
+    var selectedCategory by remember { mutableStateOf("") }
     Column() {
         Box(modifier = Modifier.fillMaxWidth()) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.logo),//logo
                 contentDescription = "little lemon logo",
                 modifier = Modifier
                     .size(100.dp)
                     .align(Alignment.Center)
             )
-            Image(painter = painterResource(id = R.drawable.profile),
+            Image(painter = painterResource(id = R.drawable.profile),//profile
                 contentDescription = "",
                 modifier = Modifier
                     .size(80.dp)
@@ -100,7 +103,7 @@ fun Home(navHostController: NavHostController) {
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     Image(
-                        painter = painterResource(id = R.drawable.hero),
+                        painter = painterResource(id = R.drawable.hero),//hero
                         contentDescription = "Hero image",
                         modifier = Modifier
                             .width(200.dp)
@@ -122,7 +125,7 @@ fun Home(navHostController: NavHostController) {
                         .padding(top = 8.dp),
                     placeholder = {
                         Text(
-                            text = "Enter search phrase"
+                            text = "Type the dish name you are looking for"
                         )
                     })
             }
@@ -141,7 +144,10 @@ fun Home(navHostController: NavHostController) {
         }
 
         // Passing filtered menu items to MenuItems composable
-        MenuItems(filteredMenuItems)
+        MenuItems(filteredMenuItems, selectedCategory) { category ->
+            selectedCategory = category.toString()
+        }
+
         //MenuItems(menuItems)
 
     }
@@ -150,10 +156,11 @@ fun Home(navHostController: NavHostController) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MenuItems(menuItems: State<List<MenuItem>>) {
-    //Log.d("TAG", "MenuItems: ${menuItems.value[0].price}")
-    //Toast.makeText(LocalContext.current, "MenuItems: ${menuItems.value[0].price}", Toast.LENGTH_LONG).show()
-
+fun MenuItems(menuItems: State<List<MenuItem>>, selectedCategory: String, onCategorySelected: (Any?) -> Unit) {
+    val menuItemsByCategory = remember(menuItems.value) {
+        menuItems.value.groupBy { it.category }
+    }
+    var filteredMenuItem: List<MenuItem> = menuItems.value
     Column {
         Text(
             text = "ORDER FOOD FOR DELIVERY",
@@ -166,17 +173,28 @@ fun MenuItems(menuItems: State<List<MenuItem>>) {
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
         ) {
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(end = 4.dp)) {
-                Text(text = "Starters")
-            }
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(end = 4.dp)) {
-                Text(text = "Mains")
-            }
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(end = 4.dp)) {
-                Text(text = "Desserts")
-            }
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(end = 4.dp)) {
-                Text(text = "Drinks")
+            menuItemsByCategory.keys.forEach { category ->
+                Button(
+                    onClick = {
+                        if (category == "mains") {
+                            filteredMenuItem = menuItems.value.filter { menuItem -> menuItem.category == category  }
+                        }
+                        if (category == "starters") {
+                           filteredMenuItem = menuItems.value.filter { menuItem -> menuItem.category == category  }
+                            Log.d("TAG", "MenuItems: " + filteredMenuItem)
+                        }
+                        if (category == "desserts") {
+                            filteredMenuItem = menuItems.value.filter { menuItem -> menuItem.category == category  }
+                            Log.d("TAG", "MenuItems: " + filteredMenuItem)
+                        }
+                        onCategorySelected("")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        //backgroundColor = if (selectedCategory.value == category) Color.Gray else Color.LightGray
+                    )
+                ) {
+                    Text(text = category)
+                }
             }
         }
         Box(
@@ -187,7 +205,7 @@ fun MenuItems(menuItems: State<List<MenuItem>>) {
                 .background(Color.Gray)
         )
         // menuItems.value.forEach { menuItem -> MenuItemCard(menuItem = menuItem)  }
-        MenuItemCard(menuItems)
+        MenuItemCard(filteredMenuItem)
 
 
     }
@@ -195,8 +213,8 @@ fun MenuItems(menuItems: State<List<MenuItem>>) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MenuItemCard(menuItems: State<List<MenuItem>>) {
-    Log.d("TAG", "MenuItemCard: " + menuItems.value.size.toString())
+fun MenuItemCard(menuItems: List<MenuItem>) {
+
     LazyColumn(
         modifier = Modifier
             .padding(8.dp)
@@ -205,7 +223,7 @@ fun MenuItemCard(menuItems: State<List<MenuItem>>) {
     ) {
 
         items(1) {
-            menuItems.value.forEach { menu ->
+            menuItems.forEach { menu ->
                 Text(text = menu.title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Row(modifier = Modifier.fillMaxWidth()) {
 
